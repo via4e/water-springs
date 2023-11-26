@@ -1,0 +1,10 @@
+body {
+
+}
+
+#map {
+    position: relative;
+    margin: auto;
+    height: 1080px;
+    width: 1920px;
+}
