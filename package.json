@@ -1,17 +1,5 @@
 {
-  "name": "water-springs",
-  "private": true,
-  "version": "1.0.0",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
-  },
-  "devDependencies": {
-    "vite": "^3.2.3"
-  },
   "dependencies": {
-    "jquery": "^3.7.1"
+    "ol": "^8.2.0"
   }
 }
