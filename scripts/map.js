@@ -30,6 +30,8 @@ const vectorLayer = new VectorLayer({
     source: vectorSource,
 });
 
+// Endpoint for springs data
+const endpoint = 'http://localhost:3000/locations';
 
 // Create a map
 const map = new Map({
@@ -47,33 +49,24 @@ const map = new Map({
 });
 
 // Loop through JSON data and add features to the vector source
-springs.forEach(point => {
-    const longitude = point.coords[1];
-    const latitude = point.coords[0];
 
-    const feature = new Feature({
-        geometry: new Point(fromLonLat([longitude, latitude])),
-        name: point.name,
+// Make a GET request to the specified endpoint
+fetch(endpoint)
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        // Handle the data received from the server
+        console.log('Data received:', data);
+        setMapDatas(data)
+    })
+    .catch(error => {
+        // Handle errors
+        console.error('Fetch error:', error);
     });
-
-    // Set the marker style to a red circle
-    feature.setStyle(new Style({
-        image: new Circle({
-            radius: 7,
-            fill: new Fill({
-                color: 'red',
-            }),
-            stroke: new Stroke({
-                color: 'black',
-                width: 2,
-            }),
-        }),
-    }));
-
-    vectorSource.addFeature(feature);
-});
-
-
 
 // Create a popup overlay
 const popup = new Overlay({
@@ -101,3 +94,31 @@ map.on('click', function (event) {
         popup.setPosition(undefined);
     }
 });
+
+function setMapDatas (springs) {
+    springs.forEach(point => {
+        const longitude = Number(point.longitude);
+        const latitude  = Number(point.latitude);
+
+        const feature = new Feature({
+            geometry: new Point(fromLonLat([longitude, latitude])),
+            name: point.name,
+        });
+
+        // Set the marker style to a red circle
+        feature.setStyle(new Style({
+            image: new Circle({
+                radius: 7,
+                fill: new Fill({
+                    color: 'red',
+                }),
+                stroke: new Stroke({
+                    color: 'black',
+                    width: 2,
+                }),
+            }),
+        }));
+
+        vectorSource.addFeature(feature);
+    });
+}
