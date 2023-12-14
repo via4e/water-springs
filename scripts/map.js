@@ -2,9 +2,6 @@ import '../style/style.css';
 import data from '../db/springs.json'
 let springs = data.data
 
-// latitude - широта
-// longitude - долгота
-const russiaCenter = fromLonLat([94.15, 66.25])
 
 import 'ol/ol.css';
 import Map from 'ol/Map';
@@ -34,6 +31,10 @@ const vectorLayer = new VectorLayer({
 const endpoint = 'http://localhost:3000/locations';
 
 // Create a map
+// latitude - широта
+// longitude - долгота
+const russiaCenter = fromLonLat([94.15, 66.25])
+
 const map = new Map({
     target: 'map',
     layers: [
@@ -48,7 +49,7 @@ const map = new Map({
     }),
 });
 
-// Loop through JSON data and add features to the vector source
+
 
 // Make a GET request to the specified endpoint
 fetch(endpoint)
@@ -68,34 +69,21 @@ fetch(endpoint)
         console.error('Fetch error:', error);
     });
 
-// Create a popup overlay
 const popup = new Overlay({
     element: document.getElementById('popup'),
-    autoPan: true,
-    autoPanAnimation: {
-        duration: 250,
-    },
+    autoPan: false,
 });
 
 map.addOverlay(popup);
 
-// Display popup on click
-map.on('click', function (event) {
-    const feature = map.forEachFeatureAtPixel(event.pixel, function (feature) {
-        return feature;
-    });
-
-    if (feature) {
-        const coordinates = feature.getGeometry().getCoordinates();
-        popup.setPosition(coordinates);
-        const content = document.getElementById('popup-content');
-        content.innerHTML = `<div>${feature.get('name')}</div>`;
-    } else {
-        popup.setPosition(undefined);
-    }
+map.on('singleclick', function (evt) {
+    var prettyCoord = ol.coordinate.toStringHDMS(ol.proj.transform(evt.coordinate, 'EPSG:3857', 'EPSG:4326'), 2);
+    popup.show(evt.coordinate, '<div><h2>Coordinates</h2><p>' + prettyCoord + '</p></div>');
 });
 
 function setMapDatas (springs) {
+
+    if (!springs.length) return;
     springs.forEach(point => {
         const longitude = Number(point.longitude);
         const latitude  = Number(point.latitude);
@@ -108,12 +96,12 @@ function setMapDatas (springs) {
         // Set the marker style to a red circle
         feature.setStyle(new Style({
             image: new Circle({
-                radius: 7,
+                radius: 9,
                 fill: new Fill({
-                    color: 'red',
+                    color: 'blue',
                 }),
                 stroke: new Stroke({
-                    color: 'black',
+                    color: 'orange',
                     width: 2,
                 }),
             }),

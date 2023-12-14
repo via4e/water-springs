@@ -1,9 +1,32 @@
+// app.js
+
 const express = require('express');
 const { Sequelize, DataTypes } = require('sequelize');
+const jwt = require('jsonwebtoken');
 
 const app = express();
 const port = 3000;
 
+// Secret key for signing and verifying JWTs
+const secretKey = 'your-secret-key';
+
+// Middleware to verify JWT for protected routes
+const verifyToken = (req, res, next) => {
+    const token = req.headers['authorization'];
+
+    if (!token) {
+        return res.status(401).json({ message: 'Unauthorized: Token missing' });
+    }
+
+    jwt.verify(token, secretKey, (err, decoded) => {
+        if (err) {
+            return res.status(401).json({ message: 'Unauthorized: Invalid token' });
+        }
+
+        req.user = decoded;
+        next();
+    });
+};
 
 // Sequelize Initialization
 const sequelize = new Sequelize('fh7927za_springs', 'fh7927za_springs', '*DpffJ3A', {
@@ -48,8 +71,8 @@ sequelize.sync()
         console.error('Error synchronizing database: ', err);
     });
 
-// Define a route to process GET requests for all elements in the database
-app.get('/locations', async (req, res) => {
+// Define a route to process GET requests for all locations
+app.get('/locations', verifyToken, async (req, res) => {
     try {
         // Query all locations from the database
         const locations = await Location.findAll();
@@ -63,7 +86,7 @@ app.get('/locations', async (req, res) => {
 });
 
 // Define a route to process POST requests for adding a location
-app.post('/locations', async (req, res) => {
+app.post('/locations', verifyToken, async (req, res) => {
     try {
         // Extract location data from the request body (adjust as needed)
         const { name, longitude, latitude, tooltip, author } = req.body;
@@ -86,7 +109,7 @@ app.post('/locations', async (req, res) => {
 });
 
 // Define a route to process DELETE requests for deleting a location by ID
-app.delete('/locations/:id', async (req, res) => {
+app.delete('/locations/:id', verifyToken, async (req, res) => {
     try {
         const locationId = req.params.id;
 
@@ -105,6 +128,22 @@ app.delete('/locations/:id', async (req, res) => {
     } catch (err) {
         console.error('Error: ', err);
         res.status(500).send('Internal Server Error');
+    }
+});
+
+// Define a route for user authentication
+app.post('/login', (req, res) => {
+    const { username, password } = req.body;
+
+    // Validate user credentials (adjust as needed)
+    if (username === 'user' && password === 'password') {
+        // Generate a JWT token
+        const token = jwt.sign({ username }, secretKey, { expiresIn: '1h' });
+
+        // Send the token as JSON response
+        res.json({ token });
+    } else {
+        res.status(401).json({ message: 'Invalid credentials' });
     }
 });
 

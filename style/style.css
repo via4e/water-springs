@@ -8,7 +8,7 @@ body {
 
 #map {
     position: absolute;
-    top: 0;
+    top: 120px;
     bottom: 0;
     width: 100%;
 }
