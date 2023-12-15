@@ -13,6 +13,8 @@ var options = {
 const app = express(options);
 const port = 8000;
 
+const server = https.createServer(options, app);
+
 
 // Sequelize Initialization
 const sequelize = new Sequelize('fh7927za_springs', 'fh7927za_springs', '*DpffJ3A', {
@@ -118,6 +120,6 @@ app.delete('/locations/:id', async (req, res) => {
 });
 
 // Start the server
-app.listen(port, () => {
+server.listen(port, () => {
     console.log(`Server is running on https://localhost:${port}`);
 });
