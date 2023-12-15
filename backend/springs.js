@@ -1,8 +1,17 @@
 const express = require('express');
 const { Sequelize, DataTypes } = require('sequelize');
 
-const app = express();
-const port = 3000;
+const https = require('node:https');
+const http = require('http');
+const fs = require('fs');
+
+var options = {
+    key: fs.readFileSync('/etc/nginx/conf.d/key.pem'),
+    cert: fs.readFileSync('/etc/nginx/conf.d/cert.pem')
+};
+
+const app = express(options);
+const port = 8000;
 
 
 // Sequelize Initialization
@@ -110,5 +119,5 @@ app.delete('/locations/:id', async (req, res) => {
 
 // Start the server
 app.listen(port, () => {
-    console.log(`Server is running on http://localhost:${port}`);
+    console.log(`Server is running on https://localhost:${port}`);
 });

@@ -28,7 +28,7 @@ const vectorLayer = new VectorLayer({
 });
 
 // Endpoint for springs data
-const endpoint = 'http://localhost:3000/locations';
+const endpoint = 'https://localhost:10443/locations';
 
 // Create a map
 // latitude - широта
