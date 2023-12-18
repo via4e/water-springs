@@ -4,6 +4,7 @@ const { Sequelize, DataTypes } = require('sequelize');
 const https = require('node:https');
 const http = require('http');
 const fs = require('fs');
+const cors = require('cors')
 
 var options = {
     key: fs.readFileSync('/etc/nginx/conf.d/key.pem'),
@@ -11,10 +12,10 @@ var options = {
 };
 
 const app = express(options);
+app.use(cors())
 const port = 8000;
 
 const server = https.createServer(options, app);
-
 
 // Sequelize Initialization
 const sequelize = new Sequelize('fh7927za_springs', 'fh7927za_springs', '*DpffJ3A', {
