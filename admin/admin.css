@@ -9,6 +9,10 @@ body {
     height: 60vh;
 }
 
+#springs-list{
+    overflow-y:scroll;
+}
+
 .content {
     background: grey;
     max-width: 1200px;
@@ -24,6 +28,14 @@ body {
 }
 
 #login-form {
+    background: white;
+    height: 100%;
+    padding: 48px;
+    border-radius: 8px;
+    border: 1px solid #00AAFF;
+}
+
+#add-form {
     background: white;
     height: 100%;
     padding: 48px;

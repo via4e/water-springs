@@ -8,7 +8,8 @@ try {
 } catch (e) {};
 
 if(username) {
-    $('.admin-btn').text('Админ')
+    console.log('username', username)
+    $('.admin-btn a').text('Админ');
 }
 
 import 'ol/ol.css';
@@ -36,7 +37,8 @@ const vectorLayer = new VectorLayer({
 });
 
 // Endpoint for springs data
-const endpoint = 'https://patrioty-rodiny.ru:3000/locations';
+//const endpoint = 'https://patrioty-rodiny.ru:3000/locations';
+const endpoint = config.server_domain + ':' + config.server_port + '/' + config.server_locations_path;
 
 // Create a map
 // latitude - широта
