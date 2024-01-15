@@ -1,6 +1,7 @@
 .DS_Store
 build/*
 dist/*
+backend/config/config.json
 coverage
 node_modules/
 npm-debug.log

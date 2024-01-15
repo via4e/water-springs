@@ -1,26 +1,63 @@
+const config = require('./config/config.json');
+console.log(config.server_version)
+
 const express = require('express');
 const { Sequelize, DataTypes } = require('sequelize');
 
 const https = require('node:https');
-const http = require('http');
+//const http = require('http');
 const fs = require('fs');
 const cors = require('cors')
+const bodyParser = require('body-parser')
+const jwt = require('jsonwebtoken');
 
 var options = {
-    key: fs.readFileSync('/etc/nginx/conf.d/key.pem'),
-    cert: fs.readFileSync('/etc/nginx/conf.d/cert.pem')
+    key: fs.readFileSync('/etc/letsencrypt/live/patrioty-rodiny.ru/privkey.pem'),
+    cert: fs.readFileSync('/etc/letsencrypt/live/patrioty-rodiny.ru/fullchain.pem')
 };
 
 const app = express(options);
 app.use(cors())
-const port = 8000;
+app.use(bodyParser.json())
+
+const port = config.server_port;
 
 const server = https.createServer(options, app);
 
+// Secret key for signing and verifying JWTs
+const secretKey = 'Q43t0KFE2W4757bngjyfqeFFHH';
+
+// Middleware to verify JWT for protected routes
+const verifyToken = (req, res, next) => {
+    const token = req.headers['authorization'];
+
+    console.log('authorization header', req.headers['authorization'])
+
+    console.log('jwt verify', token )
+
+    console.log('jwt decode', jwt.decode(token) )
+
+    if (!token) {
+        return res.status(401).json({ message: 'Unauthorized: Token missing' });
+    }
+
+    jwt.verify(token, secretKey, (err, decoded) => {
+        if (err) {
+            return res.status(401).json({ message: 'Unauthorized: Invalid token' });
+        }
+
+        req.user = decoded;
+        next();
+    });
+};
+
+
+
+
 // Sequelize Initialization
-const sequelize = new Sequelize('fh7927za_springs', 'fh7927za_springs', '*DpffJ3A', {
-    host: 'fh7927za.beget.tech',
-    dialect: 'mariadb',
+const sequelize = new Sequelize(config.dbname, config.dbuser, config.dbpassword, {
+    host: config.dbhost,
+    dialect: config.dbdialect,
 });
 
 // Define a model for your data
@@ -74,8 +111,27 @@ app.get('/locations', async (req, res) => {
     }
 });
 
+// Define a route for user authentication
+app.post('/login', (req, res) => {
+    const { username, password } = req.body;
+
+    // Validate user credentials (adjust as needed)
+    if (username === 'bulat' && password === 'bulat') {
+        // Generate a JWT token
+        const token = jwt.sign({ username }, secretKey, { expiresIn: '48h' });
+
+        // Send the token as JSON response
+        res.json({ token });
+    } else {
+        res.status(401).json({ message: 'Invalid credentials' });
+    }
+});
+
 // Define a route to process POST requests for adding a location
 app.post('/locations', async (req, res) => {
+
+    console.log('req.body', req.body)
+
     try {
         // Extract location data from the request body (adjust as needed)
         const { name, longitude, latitude, tooltip, author } = req.body;
@@ -98,7 +154,7 @@ app.post('/locations', async (req, res) => {
 });
 
 // Define a route to process DELETE requests for deleting a location by ID
-app.delete('/locations/:id', async (req, res) => {
+app.delete('/locations/:id', verifyToken, async (req, res) => {
     try {
         const locationId = req.params.id;
 

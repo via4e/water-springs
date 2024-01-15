@@ -1,0 +1,32 @@
+body {
+    background: grey;
+    margin: 0;
+}
+
+#app{
+    max-width: 1200px;
+    margin: 0 auto;
+    height: 60vh;
+}
+
+.content {
+    background: grey;
+    max-width: 1200px;
+    height: 100%;
+    margin: 0 auto;
+}
+
+.login-block {
+    position: relative;
+    top: calc((60vh - 120px)/2);
+    margin: 0 auto;
+    width: 540px;
+}
+
+#login-form {
+    background: white;
+    height: 100%;
+    padding: 48px;
+    border-radius: 8px;
+    border: 1px solid #00AAFF;
+}

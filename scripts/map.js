@@ -1,7 +1,15 @@
 import '../style/style.css';
-import data from '../db/springs.json'
-let springs = data.data
+import config from './config.json';
 
+// check user
+let username = '';
+try {
+    username = localStorage.getItem('username')
+} catch (e) {};
+
+if(username) {
+    $('.admin-btn').text('Админ')
+}
 
 import 'ol/ol.css';
 import Map from 'ol/Map';
@@ -15,7 +23,7 @@ import Overlay from 'ol/Overlay';
 import { fromLonLat } from 'ol/proj';
 import Style from 'ol/style/Style';
 import Circle from 'ol/style/Circle';
-import Stroke from 'ol/style/Stroke';  // Add this line
+import Stroke from 'ol/style/Stroke';
 import Fill from 'ol/style/Fill';
 
 // Create a vector source and layer
@@ -28,12 +36,12 @@ const vectorLayer = new VectorLayer({
 });
 
 // Endpoint for springs data
-const endpoint = 'https://XN----7SBNOC4ADBELDTD0KG.XN--P1AI:8000/locations';
+const endpoint = 'https://patrioty-rodiny.ru:3000/locations';
 
 // Create a map
 // latitude - широта
 // longitude - долгота
-const russiaCenter = fromLonLat([94.15, 66.25])
+const russiaCenter = fromLonLat([46.46, 53.53])
 
 const map = new Map({
     target: 'map',
@@ -45,13 +53,47 @@ const map = new Map({
     ],
     view: new View({
         center: russiaCenter,
-        zoom: 4.5,
+        zoom: 6,
     }),
 });
 
 
 
-// Make a GET request to the specified endpoint
+/**
+ * Elements that make up the popup.
+ */
+
+// Create a popup overlay
+const popup = new Overlay({
+    element: document.getElementById('popup'),
+    autoPan: true,
+    autoPanAnimation: {
+        duration: 250,
+    },
+});
+
+map.addOverlay(popup);
+
+// Display popup on click
+map.on('click', function (event) {
+    const feature = map.forEachFeatureAtPixel(event.pixel, function (feature) {
+        return feature;
+    });
+
+    if (feature) {
+        const coordinates = feature.getGeometry().getCoordinates();
+        popup.setPosition(coordinates);
+        const content = document.getElementById('popup-content');
+        content.innerHTML = `<div>${feature.get('name')}</div>`;
+    } else {
+        popup.setPosition(undefined);
+    }
+});
+
+
+
+
+// Ger springs for map
 fetch(endpoint)
     .then(response => {
         if (!response.ok) {
@@ -60,7 +102,6 @@ fetch(endpoint)
         return response.json();
     })
     .then(data => {
-        // Handle the data received from the server
         console.log('Data received:', data);
         setMapDatas(data)
     })
@@ -69,17 +110,8 @@ fetch(endpoint)
         console.error('Fetch error:', error);
     });
 
-const popup = new Overlay({
-    element: document.getElementById('popup'),
-    autoPan: false,
-});
 
-map.addOverlay(popup);
 
-map.on('singleclick', function (evt) {
-    var prettyCoord = ol.coordinate.toStringHDMS(ol.proj.transform(evt.coordinate, 'EPSG:3857', 'EPSG:4326'), 2);
-    popup.show(evt.coordinate, '<div><h2>Coordinates</h2><p>' + prettyCoord + '</p></div>');
-});
 
 function setMapDatas (springs) {
 

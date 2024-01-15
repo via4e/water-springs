@@ -1,0 +1,9 @@
+{
+    "dbdialect": "mariadb",
+    "dbhost": "",
+    "dbname": "",
+    "dbuser": "",
+    "dbpassword": "",
+    "server_port": ,
+    "server_version": "springs 14.01.2024"
+}

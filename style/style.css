@@ -12,3 +12,19 @@ body {
     bottom: 0;
     width: 100%;
 }
+
+#popup-content {
+    color: black;
+    -webkit-text-fill-color: aquamarine;
+    -webkit-text-stroke-width: 1px;
+    -webkit-text-stroke-color: black;
+
+    text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+
+
+    font-size: 2em;
+    font-weight: bold;
+
+    background: white;
+    padding: 16px;
+}
