@@ -10,7 +10,9 @@ body {
 }
 
 #springs-list{
-    overflow-y:scroll;
+    height: calc(100vh - 300px);
+    overflow-y: scroll;
+    position: relative;
 }
 
 .content {

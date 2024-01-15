@@ -167,7 +167,6 @@ a {cursor:pointer;}
 }
 
 .tab {
-
     clear:both;
     width:100%;
     border-left: solid 1px #CCC;
@@ -176,8 +175,7 @@ a {cursor:pointer;}
     text-align:left;
     padding-top: 20px;
     background: #CCCCCC;
-    height: 60vh;
-
+    overflow: hidden;
 }
 
 .tab h2 { margin-left: 15px;  margin-right: 15px;  margin-bottom: 10px; color: #5685bc; }
