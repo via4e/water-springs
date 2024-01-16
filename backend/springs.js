@@ -154,10 +154,11 @@ app.post('/locations', async (req, res) => {
 });
 
 // Define a route to process DELETE requests for deleting a location by ID
-app.delete('/locations/:id', verifyToken, async (req, res) => {
+// TODO : app.delete('/locations/:id', verifyToken, async (req, res) => {
+app.delete('/locations/:id', async (req, res) => {
     try {
-        const locationId = req.params.id;
-
+        const locationId = (req.params.id).slice(1);
+        console.log ('delete id:', locationId)
         // Delete the location from the database
         const deletedLocation = await Location.destroy({
             where: {

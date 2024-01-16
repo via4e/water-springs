@@ -15,6 +15,15 @@ body {
     position: relative;
 }
 
+.delete-x:hover {
+    cursor: pointer;
+}
+
+.delete-x {
+    color: darkred;
+    font-weight: bold;
+}
+
 .content {
     background: grey;
     max-width: 1200px;

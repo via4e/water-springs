@@ -10,7 +10,7 @@ document.addEventListener("update", function() {
 $(document).ready(function () {
 
     updateData();
-    console.log('admin *** Water Springs 15/01/2024')
+    console.log('admin *** Water Springs, ', conf.client_version);
 
     // Tabs
     $('#tabs li a:not(:first)').addClass('inactive');
@@ -26,14 +26,6 @@ $(document).ready(function () {
             $('.tab').hide();
             $('#'+ t + 'C').fadeIn('slow');
         }
-    });
-
-    // Exit
-    $( ".js-exit" ).on( "click", function() {
-        console.log('exit..')
-        localStorage.setItem('token', '');
-        localStorage.setItem('username', '');
-        window.location.href = "/";
     });
 
     // User check
@@ -53,6 +45,14 @@ $(document).ready(function () {
     const header = {
         headers: { Authorization: `Bearer ${token}` }
     };
+
+    // UI
+    $( ".js-exit" ).on( "click", function() {
+        console.log('exit..')
+        localStorage.setItem('token', '');
+        localStorage.setItem('username', '');
+        window.location.href = "/";
+    });
 
     $("#new-form").on("submit", function (e) {
         e.preventDefault();
@@ -107,7 +107,6 @@ $(document).ready(function () {
 
         return 0;
     });
-
 });
 
 const updateData = async () => {
@@ -171,6 +170,7 @@ const updateView = () => {
                 <td>${longitude}</td>
                 <td>${latitude}</td>
                 <td>${tooltip}</td>
+                <td data-id="${id}" class="delete-x">X</td>
                 </tr>`
         springsTable += html
     });
@@ -178,4 +178,15 @@ const updateView = () => {
     springsTable += `</tbody></table>`
 
     $('#springs-list').html(springsTable)
+
+    // Delete spring
+    $(".delete-x").click(function (e) {
+        let id = $(this).attr('data-id');
+        try {
+            axios.delete(URL_LOCATIONS + '/:' + id)
+            updateData();
+        } catch (error) {
+            throw new Error('axios cant get locations', error);
+        }
+    });
 }
