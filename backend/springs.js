@@ -177,6 +177,54 @@ app.delete('/locations/:id', async (req, res) => {
     }
 });
 
+app.delete('/locations/:id', async (req, res) => {
+    try {
+        const locationId = (req.params.id).slice(1);
+        console.log ('delete id:', locationId)
+        // Delete the location from the database
+        const deletedLocation = await Location.destroy({
+            where: {
+                id: locationId,
+            },
+        });
+
+        if (deletedLocation) {
+            res.json({ message: 'Location deleted successfully' });
+        } else {
+            res.status(404).json({ message: 'Location not found' });
+        }
+    } catch (err) {
+        console.error('Error: ', err);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
+app.patch('/locations/:id', async (req, res) => {
+    try {
+        const locationId = (req.params.id).slice(1);
+        const updatedLocationData = req.body; // Assuming the updated data is sent in the request body
+        console.log('************');
+        console.log('************');
+        console.log('a', updatedLocationData)
+        // Update the location in the database
+
+
+        Location.update(
+            {   name: req.body.name,
+                longitude: req.body.longitude,
+                latitude: req.body.latitude,
+                tooltip: req.body.tooltip
+            },
+            { where: { id: locationId } })
+            .then(function(rowsUpdated) {
+                res.json(rowsUpdated)
+            })
+    } catch (err) {
+        console.error('Error: ', err);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
 // Start the server
 server.listen(port, () => {
     console.log(`Server is running on https://localhost:${port}`);

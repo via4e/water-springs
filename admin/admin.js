@@ -1,6 +1,8 @@
 let springs = [];
+let currentSpring = {};
 const URL_LOCATIONS = conf.server_domain + ':' + conf.server_port + '/' + conf.server_locations_path;
 const updateEvent = new Event('update')
+const regexp = /-?\d{1,3}\.\d+/
 
 document.addEventListener("update", function() {
     console.log('listener: update')
@@ -19,6 +21,7 @@ $(document).ready(function () {
 
     $('#tabs li a').click(function(){
         var t = $(this).attr('id');
+        console.log(t)
         if($(this).hasClass('inactive')){
             $('#tabs li a').addClass('inactive');
             $(this).removeClass('inactive');
@@ -57,7 +60,7 @@ $(document).ready(function () {
     $("#new-form").on("submit", function (e) {
         e.preventDefault();
         let isValid = true;
-        regexp = /-?\d{1,3}\.\d+/
+        let id = localStorage.getItem('spring_id') || null;
 
         let name = $('#name').val()
         let longitude = $('#longitude').val()
@@ -84,29 +87,50 @@ $(document).ready(function () {
         }
         console.log('creds:', name.length, longitude.length, latitude.length, tooltip, author)
 
-
-        isValid ?
+        // new spring - POST
+        if (isValid & !id) {
             axios.post(
                 URL_LOCATIONS,
                 payload,
                 header
-            )
-            .then(function (response) {
-
+            ).then(function (response) {
                 console.log('response', response.data);
-                console.log('The SPRING is added....')
+                console.log(`The SPRING  ${id} is added....`)
                 setTimeout(() => {
                     updateData();
                 }, 1000);
-            })
-            .catch(function (error) {
+            }).catch(function (error) {
                 console.log('Something Wrong...');
                 console.log(error);
             })
-            : null;
+        }
+
+        // we have id for PATCH old spring
+        if (isValid & id) {
+            console.log('Patch!!')
+            axios.patch(
+                URL_LOCATIONS + '/:' + id,
+                payload,
+                header
+            ).then(function (response) {
+                console.log('response', response.data);
+                console.log(`The SPRING  ${id} is updated....`)
+                setTimeout(() => {
+                    updateData();
+                }, 1000);
+            }).catch(function (error) {
+                console.log('Something Wrong...');
+                console.log(error);
+            })
+        }
+
+        //clear
+        id = null;
+        localStorage.setItem('spring_id', id);
 
         return 0;
     });
+
 });
 
 const updateData = async () => {
@@ -165,12 +189,15 @@ const updateView = () => {
         let html =''
 
         html += `<tr>
-                <td>${id}</td>
-                <td>${name}</td>
-                <td>${longitude}</td>
-                <td>${latitude}</td>
-                <td>${tooltip}</td>
-                <td data-id="${id}" class="delete-x">X</td>
+                    <td>${id}</td>
+                    <td>${name}</td>
+                    <td>${longitude}</td>
+                    <td>${latitude}</td>
+                    <td>${tooltip}</td>
+                    <td data-id="${id}" class="js-spring-edit">
+                        <span class="icon-edit"></span>
+                    </td>
+                    <td data-id="${id}" class="delete-x">X</td>
                 </tr>`
         springsTable += html
     });
@@ -181,6 +208,7 @@ const updateView = () => {
 
     // Delete spring
     $(".delete-x").click(function (e) {
+        e.preventDefault();
         let id = $(this).attr('data-id');
         try {
             axios.delete(URL_LOCATIONS + '/:' + id)
@@ -188,5 +216,26 @@ const updateView = () => {
         } catch (error) {
             throw new Error('axios cant get locations', error);
         }
+    });
+
+    // Edit spring
+    $(".js-spring-edit").click(function (e) {
+        e.preventDefault();
+        let id = Number($(this).attr('data-id'));
+        localStorage.setItem('spring_id', id);
+        let currentSpring = springs.find((e) => e.id === id)
+
+        console.log('id', currentSpring)
+        //Set inputs
+        $('#name').val(currentSpring.name)
+        $('#latitude').val(currentSpring.latitude)
+        $('#longitude').val(currentSpring.longitude)
+        $('#tooltip').val(currentSpring.tooltip)
+        $('#author').val(currentSpring.author)
+
+        $('.tab').hide();
+        $('#tab1').addClass('inactive');
+        $('#tab3').addClass('inactive');
+        $('#tab2C').fadeIn('slow');
     });
 }
