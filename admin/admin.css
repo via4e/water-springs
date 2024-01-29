@@ -68,3 +68,47 @@ body {
 .icon-edit:hover {
     background: url("../static/img/edit-orange.svg");
 }
+
+#modal-bg {
+    display: none;
+    top: 0;
+    z-index: 9;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
+#modal-delete {
+    position: absolute;
+    left: calc( 50vh - 240px );
+    top: calc( 50vh - 180px );
+    z-index: 10;
+    width: 480px;
+    height: 360px;
+
+    padding: 20px;
+    background: #CCCCCC;
+    border: 2px solid darkred;
+    border-radius: 6px;
+}
+
+.modal-delete__text{
+    color: black;
+    font-weight: bold;
+    font-size: 20px;
+}
+
+.modal-delete__buttons {
+    position: absolute;
+    bottom: 30px;
+}
+
+.editor{
+    display: flex;
+    flex-direction: row;
+}
+
+#choosed-image {
+    max-width: 400px;
+    max-height: 300px;
+}

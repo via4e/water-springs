@@ -131,6 +131,31 @@ $(document).ready(function () {
         return 0;
     });
 
+    //image upload prepare
+    $('#fileUpload').on('change', function () {
+        console.log('Change!')
+        let file = this.files[0];
+        let reader = new FileReader();
+        let image = $('#choosed-image')
+
+        reader.readAsDataURL(file);
+
+        reader.onload = function () {
+            var data = reader.result;  // data <-- in this var you have the file data in Base64 format
+            image.attr('src', data)
+        };
+
+        reader.onerror = function() {
+            console.log(reader.error);
+        };
+    });
+
+    $("#img-form").on("submit", function (e){
+        e.preventDefault();
+        console.log('img:', e)
+    });
+
+
 });
 
 const updateData = async () => {
@@ -206,16 +231,46 @@ const updateView = () => {
 
     $('#springs-list').html(springsTable)
 
-    // Delete spring
+    // Delete spring diag
     $(".delete-x").click(function (e) {
         e.preventDefault();
-        let id = $(this).attr('data-id');
+
+        let id = Number( $(this).attr('data-id') );
+
+        if(id) {
+            localStorage.setItem('spring_id', id);
+            console.log('spring_id', typeof id)
+            const spring = springs.find(spring => spring.id === id)
+            console.log('spr', spring)
+
+            $('.modal-delete__text').text(`Вы действительно хотите удалить родник ${spring.id} ${spring.name}?`);
+            $('#modal-bg').show()
+        } else {
+            throw new Error('Spring id is invalid:', id);
+        }
+    });
+
+    $(".js-delete-ok").click(function (e) {
+        let id = localStorage.getItem('spring_id') || null;
+        if(!id) return;
         try {
-            axios.delete(URL_LOCATIONS + '/:' + id)
-            updateData();
+            axios.delete(URL_LOCATIONS + '/:' + id).then(function (response) {
+                console.warn(response.data.message);
+                $('#modal-bg').hide()
+                //clear deleted spring
+                localStorage.setItem('spring_id', null);
+                updateData();
+            })
+
         } catch (error) {
             throw new Error('axios cant get locations', error);
         }
+    });
+
+    $(".js-delete-cancel").click(function (e) {
+        //clear current spring
+        localStorage.setItem('spring_id', null);
+        $('#modal-bg').hide()
     });
 
     // Edit spring

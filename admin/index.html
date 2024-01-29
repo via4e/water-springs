@@ -79,52 +79,74 @@
         </div>
 
         <div class="tab" id="tab2C">
-            <form id="new-form">
-                <fieldset>
-                    <legend>Добавить новый родник</legend>
+            <div class="editor">
+                <form id="new-form">
+                    <fieldset>
+                        <legend>Добавить новый родник</legend>
 
-                    <table class="pure-table">
-                        <tbody>
-                        <tr>
-                            <td>Название</td>
-                            <td>
-                                <input id="name" type="text" placeholder="Название" />
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Широта</td>
-                            <td>
-                                <input id="latitude" type="text" placeholder="Широта" />
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Долгота</td>
-                            <td>
-                                <input id="longitude" type="text" placeholder="Долгота" />
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Описание</td>
-                            <td>
-                                <input id="tooltip" type="text" placeholder="Краткое описание" />
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Автор</td>
-                            <td>
-                                <input id="author" type="text" placeholder="Краткое описание" />
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
+                        <table class="pure-table">
+                            <tbody>
+                            <tr>
+                                <td>Название</td>
+                                <td>
+                                    <input id="name" type="text" placeholder="Название" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Широта</td>
+                                <td>
+                                    <input id="latitude" type="text" placeholder="Широта" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Долгота</td>
+                                <td>
+                                    <input id="longitude" type="text" placeholder="Долгота" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Описание</td>
+                                <td>
+                                    <input id="tooltip" type="text" placeholder="Краткое описание" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Автор</td>
+                                <td>
+                                    <input id="author" type="text" placeholder="Краткое описание" />
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
 
+
+                        <button type="submit" class="pure-button pure-button-primary">Добавить</button>
+                    </fieldset>
+                </form>
+
+                <form id="img-form" >
+                    <label for="fileUpload">Choose images to upload (PNG, JPG)</label>
+                    <input type="file" id="fileUpload" accept="image/jpeg, image/png, image/jpg">
 
                     <button type="submit" class="pure-button pure-button-primary">Добавить</button>
-                </fieldset>
-            </form>
+
+                    <img id="choosed-image">
+                </form>
+            </div>
+
         </div>
 
         <div class="tab" id="tab3C">Users</div>
+    </div>
+
+    <div id="modal-bg">
+        <div id="modal-delete">
+            <div class="modal-delete__text"></div>
+            <div class="modal-delete__buttons">
+                <button class="pure-button js-delete-ok">OK</button>
+                <button class="pure-button js-delete-cancel">Cancel</button>
+            </div>
+        </div>
     </div>
 
     <script src="config.js" charset="utf-8"></script>
