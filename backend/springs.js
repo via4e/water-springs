@@ -177,26 +177,15 @@ app.delete('/locations/:id', async (req, res) => {
     }
 });
 
-app.delete('/locations/:id', async (req, res) => {
-    try {
-        const locationId = (req.params.id).slice(1);
-        console.log ('delete id:', locationId)
-        // Delete the location from the database
-        const deletedLocation = await Location.destroy({
-            where: {
-                id: locationId,
-            },
-        });
-
-        if (deletedLocation) {
-            res.json({ message: 'Location deleted successfully' });
-        } else {
-            res.status(404).json({ message: 'Location not found' });
-        }
-    } catch (err) {
-        console.error('Error: ', err);
-        res.status(500).send('Internal Server Error');
-    }
+app.post('/upload', async (req, res) => {
+    console.log ('upload', req.body);
+    // try {
+    //
+    //
+    // } catch (err) {
+    //     console.error('Error: ', err);
+    //     res.status(500).send('Internal Server Error');
+    // }
 });
 
 app.patch('/locations/:id', async (req, res) => {

@@ -1,6 +1,7 @@
 let springs = [];
-let currentSpring = {};
+let uploadImg = null;
 const URL_LOCATIONS = conf.server_domain + ':' + conf.server_port + '/' + conf.server_locations_path;
+const URL_UPLOAD = conf.server_domain + ':' + conf.server_port + '/' + 'upload';
 const updateEvent = new Event('update')
 const regexp = /-?\d{1,3}\.\d+/
 
@@ -133,6 +134,7 @@ $(document).ready(function () {
 
     //image upload prepare
     $('#fileUpload').on('change', function () {
+
         console.log('Change!')
         let file = this.files[0];
         let reader = new FileReader();
@@ -141,8 +143,8 @@ $(document).ready(function () {
         reader.readAsDataURL(file);
 
         reader.onload = function () {
-            var data = reader.result;  // data <-- in this var you have the file data in Base64 format
-            image.attr('src', data)
+            uploadImg = reader.result;  // data <-- in this var you have the file data in Base64 format
+            image.attr('src', uploadImg)
         };
 
         reader.onerror = function() {
@@ -152,7 +154,24 @@ $(document).ready(function () {
 
     $("#img-form").on("submit", function (e){
         e.preventDefault();
-        console.log('img:', e)
+        console.log('img:', uploadImg)
+
+        ///Тут проверка, то ли грузим
+
+        axios.post(
+            URL_UPLOAD,
+            uploadImg,
+            header
+        ).then(function (response) {
+            console.log('response', response.data);
+            console.log(`The SPRING  ${id} is added....`)
+            setTimeout(() => {
+                updateData();
+            }, 1000);
+        }).catch(function (error) {
+            console.log('Something Wrong...');
+            console.log(error);
+        })
     });
 
 
