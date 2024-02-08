@@ -60,7 +60,6 @@ const map = new Map({
 });
 
 
-
 /**
  * Elements that make up the popup.
  */
@@ -82,11 +81,25 @@ map.on('click', function (event) {
         return feature;
     });
 
+    console.log('f>>', feature)
+    console.log('f>>', feature.get('image') )
+
     if (feature) {
         const coordinates = feature.getGeometry().getCoordinates();
         popup.setPosition(coordinates);
         const content = document.getElementById('popup-content');
-        content.innerHTML = `<div>${feature.get('name')}</div>`;
+        content.innerHTML = `
+            <div class="popup-box">
+                <div class="popup-header">${feature.get('name')} <div class="popup-close"></div></div>
+                <img class="popup-image" src='/images/${feature.get('image')}' alt="родник"/>
+                <div class="popup-description">${feature.get('description')}</div>
+            </div>    
+        `;
+
+        $('.popup-close').on('click', function (event){
+            console.log('Close!', popup)
+            popup.setPosition(undefined);
+        });
     } else {
         popup.setPosition(undefined);
     }
@@ -125,6 +138,8 @@ function setMapDatas (springs) {
         const feature = new Feature({
             geometry: new Point(fromLonLat([longitude, latitude])),
             name: point.name,
+            image: point.main_image,
+            description: point.tooltip
         });
 
         // Set the marker style to a red circle

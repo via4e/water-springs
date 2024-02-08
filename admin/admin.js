@@ -61,15 +61,24 @@ $(document).ready(function () {
     });
 
     //test feature, fill on Enter
-    $( "#tab2C" ).on( "keyup", function() {
+    $( "#tab2C" ).on( "keyup", function(e) {
+        e.preventDefault();
+
+        const min = 45.45;
+        const max = 53.53;
+
+        const randomGeo = (min,max) => Math.random() * (max - min) + min
+
         if ( event.which == 13 ) {
             event.preventDefault();
-            $('input#name').val('New Spring')
-            $('input#latitude').val('56.838002')
-            $('input#longitude').val('60.597295')
-            $('input#tooltip').val('Description')
+            $('input#name').val( 'Spring ' + (''+Date.now()).slice(-5) ) // Random Name
+            $('input#latitude').val(randomGeo(min,max))
+            $('input#longitude').val(randomGeo(min,max))
+            $('input#tooltip').val('Описание родника такого-то. Жил-был родник, и в нём плескалась водица...')
             $('input#author').val('New Spring')
         }
+
+
     } );
 
     $("#new-form").on("submit", function (e) {
@@ -83,6 +92,10 @@ $(document).ready(function () {
         let tooltip = $('#tooltip').val()
         let author = $('#author').val()
 
+        if(id) {
+            uploadImgFilename = (springs.find( spring => spring.id === id)).main_image
+        }
+
         let payload = {
             name: name,
             longitude: longitude,
@@ -91,6 +104,8 @@ $(document).ready(function () {
             author: localStorage.getItem('username') || '',
             main_image: uploadImgFilename || ''
         }
+
+
 
         if (name.length === 0 || longitude.length === 0 || latitude.length === 0) {
             console.log('Add spring: Empty Data');
@@ -101,15 +116,31 @@ $(document).ready(function () {
             console.log('Add spring:  coords');
             isValid = false;
         }
-        console.log('creds:', payload, 'valid:', isValid)
+
+        if (isValid) console.log('Form before sending:', payload)
 
         // Если есть картинка, отправляем её
         if(payload.main_image && isValid) {
-            console.warn('try to upload image...')
+
+            const base64Data = uploadImg.split(',')[1];
+            const image = { image: base64Data };
+
+            console.warn('try to upload image...', image)
+
+            const data = {
+                image,
+                payload
+            }
+
+            console.warn('data:', data)
+
             axios.post(
                 URL_UPLOAD,
-                uploadImg,
-                header
+                data,
+                {headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'multipart/form-data'
+                }}
             ).then(function (response) {
                 console.log('response', response.data);
                 console.log(`The PIC  ${uploadImgFilename} is added....`)

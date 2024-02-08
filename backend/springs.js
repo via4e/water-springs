@@ -1,3 +1,4 @@
+const path = require('node:path');
 const config = require('./config/config.json');
 console.log(config.server_version)
 
@@ -8,20 +9,27 @@ const https = require('node:https');
 
 const fs = require('fs');
 const cors = require('cors')
-const bodyParser = require('body-parser')
-const jwt = require('jsonwebtoken');
 
-const multer = require("multer");
-const upload = multer({ dest: "../patrioty/images/" });
+
+
+//const fileUpload = require('express-fileupload');
+
+const multer = require('multer');
+const upload = multer({ limits: { fileSize: 24 * 1024 * 1024 } });
+
+
+
+const jwt = require('jsonwebtoken');
 
 var options = {
     key: fs.readFileSync('/etc/letsencrypt/live/patrioty-rodiny.ru/privkey.pem'),
     cert: fs.readFileSync('/etc/letsencrypt/live/patrioty-rodiny.ru/fullchain.pem')
 };
 
+const maxRequestBodySize = '24mb';
 const app = express(options);
 app.use(cors())
-app.use(express.json())
+app.use(express.json({limit: maxRequestBodySize}));
 
 const port = config.server_port;
 
@@ -104,6 +112,31 @@ sequelize.sync()
         console.error('Error synchronizing database: ', err);
     });
 
+// Define a route to image upload
+app.post('/upload', upload.single('image'), (req, res) => {
+
+    console.warn('UPLOAD>>>>img:::', req.body.payload );
+
+    if (!req.body.image) {
+        return res.status(400).send('No file uploaded');
+    }
+
+    // Access the uploaded image data
+    const imageFilename = req.body.payload.main_image
+    const imageData = req.body.image.image;
+    const imageBuffer = Buffer.from(imageData.replace(/^data:image\/\w+;base64,/, ''), 'base64');
+
+    fs.writeFile(path.resolve( '../patrioty/images/' + imageFilename ), imageBuffer, (err) => {
+        if (err) {
+            console.error(err);
+            res.sendStatus(500);
+        } else {
+            res.status(200).send('Image uploaded successfully');
+        }
+    });
+});
+
+
 // Define a route to process GET requests for all elements in the database
 app.get('/locations', async (req, res) => {
     try {
@@ -137,7 +170,7 @@ app.post('/login', (req, res) => {
 // Define a route to process POST requests for adding a location
 app.post('/locations', async (req, res) => {
 
-    console.log('new spring req.body:>', req.body)
+    //console.log('new spring req.body:>', req.body)
 
     try {
         // Extract location data from the request body (adjust as needed)
@@ -183,24 +216,6 @@ app.delete('/locations/:id', async (req, res) => {
         console.error('Error: ', err);
         res.status(500).send('Internal Server Error');
     }
-});
-
-app.post('/upload', upload.any(), (req, res) => {
-    console.log('UPLOAD>>>> ', req)
-    const title = req.body;
-    const files = req.files;
-
-    console.log(title);
-    console.log(files);
-
-    res.sendStatus(200);
-    // try {
-    //
-    //
-    // } catch (err) {
-    //     console.error('Error: ', err);
-    //     res.status(500).send('Internal Server Error');
-    // }
 });
 
 app.patch('/locations/:id', async (req, res) => {
