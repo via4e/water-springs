@@ -5,11 +5,14 @@ const express = require('express');
 const { Sequelize, DataTypes } = require('sequelize');
 
 const https = require('node:https');
-//const http = require('http');
+
 const fs = require('fs');
 const cors = require('cors')
 const bodyParser = require('body-parser')
 const jwt = require('jsonwebtoken');
+
+const multer = require("multer");
+const upload = multer({ dest: "../patrioty/images/" });
 
 var options = {
     key: fs.readFileSync('/etc/letsencrypt/live/patrioty-rodiny.ru/privkey.pem'),
@@ -18,7 +21,7 @@ var options = {
 
 const app = express(options);
 app.use(cors())
-app.use(bodyParser.json())
+app.use(express.json())
 
 const port = config.server_port;
 
@@ -86,6 +89,10 @@ const Location = sequelize.define('Location', {
         type: DataTypes.STRING,
         allowNull: true,
     },
+    main_image: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
 });
 
 // Synchronize the model with the database
@@ -130,11 +137,11 @@ app.post('/login', (req, res) => {
 // Define a route to process POST requests for adding a location
 app.post('/locations', async (req, res) => {
 
-    console.log('req.body', req.body)
+    console.log('new spring req.body:>', req.body)
 
     try {
         // Extract location data from the request body (adjust as needed)
-        const { name, longitude, latitude, tooltip, author } = req.body;
+        const { name, longitude, latitude, tooltip, author, main_image } = req.body;
 
         // Create a new location in the database
         const newLocation = await Location.create({
@@ -143,6 +150,7 @@ app.post('/locations', async (req, res) => {
             latitude,
             tooltip,
             author,
+            main_image
         });
 
         // Send the newly created location as JSON response
@@ -177,8 +185,15 @@ app.delete('/locations/:id', async (req, res) => {
     }
 });
 
-app.post('/upload', async (req, res) => {
-    console.log ('upload', req.body);
+app.post('/upload', upload.any(), (req, res) => {
+    console.log('UPLOAD>>>> ', req)
+    const title = req.body;
+    const files = req.files;
+
+    console.log(title);
+    console.log(files);
+
+    res.sendStatus(200);
     // try {
     //
     //
@@ -197,12 +212,12 @@ app.patch('/locations/:id', async (req, res) => {
         console.log('a', updatedLocationData)
         // Update the location in the database
 
-
         Location.update(
             {   name: req.body.name,
                 longitude: req.body.longitude,
                 latitude: req.body.latitude,
-                tooltip: req.body.tooltip
+                tooltip: req.body.tooltip,
+                main_image: req.body.main_image
             },
             { where: { id: locationId } })
             .then(function(rowsUpdated) {

@@ -1,5 +1,7 @@
 let springs = [];
 let uploadImg = null;
+let uploadImgFilename = '';
+
 const URL_LOCATIONS = conf.server_domain + ':' + conf.server_port + '/' + conf.server_locations_path;
 const URL_UPLOAD = conf.server_domain + ':' + conf.server_port + '/' + 'upload';
 const updateEvent = new Event('update')
@@ -58,10 +60,22 @@ $(document).ready(function () {
         window.location.href = "/";
     });
 
+    //test feature, fill on Enter
+    $( "#tab2C" ).on( "keyup", function() {
+        if ( event.which == 13 ) {
+            event.preventDefault();
+            $('input#name').val('New Spring')
+            $('input#latitude').val('56.838002')
+            $('input#longitude').val('60.597295')
+            $('input#tooltip').val('Description')
+            $('input#author').val('New Spring')
+        }
+    } );
+
     $("#new-form").on("submit", function (e) {
         e.preventDefault();
         let isValid = true;
-        let id = localStorage.getItem('spring_id') || null;
+        let id = (localStorage.getItem('spring_id'))*1;
 
         let name = $('#name').val()
         let longitude = $('#longitude').val()
@@ -74,7 +88,8 @@ $(document).ready(function () {
             longitude: longitude,
             latitude: latitude,
             tooltip: tooltip,
-            author: localStorage.getItem('username') || ''
+            author: localStorage.getItem('username') || '',
+            main_image: uploadImgFilename || ''
         }
 
         if (name.length === 0 || longitude.length === 0 || latitude.length === 0) {
@@ -86,10 +101,31 @@ $(document).ready(function () {
             console.log('Add spring:  coords');
             isValid = false;
         }
-        console.log('creds:', name.length, longitude.length, latitude.length, tooltip, author)
+        console.log('creds:', payload, 'valid:', isValid)
+
+        // Если есть картинка, отправляем её
+        if(payload.main_image && isValid) {
+            console.warn('try to upload image...')
+            axios.post(
+                URL_UPLOAD,
+                uploadImg,
+                header
+            ).then(function (response) {
+                console.log('response', response.data);
+                console.log(`The PIC  ${uploadImgFilename} is added....`)
+                setTimeout(() => {
+                    updateData();
+                }, 1000);
+            }).catch(function (error) {
+                console.log('Something Wrong...');
+                console.log(error);
+            })
+        }
+
 
         // new spring - POST
         if (isValid & !id) {
+            console.warn('try to write NEW spring...')
             axios.post(
                 URL_LOCATIONS,
                 payload,
@@ -97,6 +133,7 @@ $(document).ready(function () {
             ).then(function (response) {
                 console.log('response', response.data);
                 console.log(`The SPRING  ${id} is added....`)
+
                 setTimeout(() => {
                     updateData();
                 }, 1000);
@@ -108,7 +145,7 @@ $(document).ready(function () {
 
         // we have id for PATCH old spring
         if (isValid & id) {
-            console.log('Patch!!')
+            console.warn('try to PATCH spring...')
             axios.patch(
                 URL_LOCATIONS + '/:' + id,
                 payload,
@@ -126,8 +163,7 @@ $(document).ready(function () {
         }
 
         //clear
-        id = null;
-        localStorage.setItem('spring_id', id);
+        localStorage.setItem('spring_id', 0);
 
         return 0;
     });
@@ -135,7 +171,6 @@ $(document).ready(function () {
     //image upload prepare
     $('#fileUpload').on('change', function () {
 
-        console.log('Change!')
         let file = this.files[0];
         let reader = new FileReader();
         let image = $('#choosed-image')
@@ -145,36 +180,15 @@ $(document).ready(function () {
         reader.onload = function () {
             uploadImg = reader.result;  // data <-- in this var you have the file data in Base64 format
             image.attr('src', uploadImg)
+
+            uploadImgFilename = Date.now() + '_' + file.name
+            console.log('event: Change! New file name:', uploadImgFilename)
         };
 
         reader.onerror = function() {
             console.log(reader.error);
         };
     });
-
-    $("#img-form").on("submit", function (e){
-        e.preventDefault();
-        console.log('img:', uploadImg)
-
-        ///Тут проверка, то ли грузим
-
-        axios.post(
-            URL_UPLOAD,
-            uploadImg,
-            header
-        ).then(function (response) {
-            console.log('response', response.data);
-            console.log(`The SPRING  ${id} is added....`)
-            setTimeout(() => {
-                updateData();
-            }, 1000);
-        }).catch(function (error) {
-            console.log('Something Wrong...');
-            console.log(error);
-        })
-    });
-
-
 });
 
 const updateData = async () => {
@@ -270,14 +284,14 @@ const updateView = () => {
     });
 
     $(".js-delete-ok").click(function (e) {
-        let id = localStorage.getItem('spring_id') || null;
+        let id = localStorage.getItem('spring_id') || 0;
         if(!id) return;
         try {
             axios.delete(URL_LOCATIONS + '/:' + id).then(function (response) {
                 console.warn(response.data.message);
                 $('#modal-bg').hide()
                 //clear deleted spring
-                localStorage.setItem('spring_id', null);
+                localStorage.setItem('spring_id', 0);
                 updateData();
             })
 
@@ -288,7 +302,7 @@ const updateView = () => {
 
     $(".js-delete-cancel").click(function (e) {
         //clear current spring
-        localStorage.setItem('spring_id', null);
+        localStorage.setItem('spring_id', 0);
         $('#modal-bg').hide()
     });
 
